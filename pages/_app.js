@@ -1,7 +1,7 @@
-import '../styles/globals.css'
 import { ChakraProvider } from '@chakra-ui/react'
 import { SWRConfig } from 'swr'
-import axios from 'axios'
+import Layout from '../components/layout'
+import '../styles/globals.css'
 
 
 function MyApp({ Component, pageProps }) {
@@ -10,35 +10,32 @@ function MyApp({ Component, pageProps }) {
   // const fetcher = (...args) => fetch(...args).then(res => res.json())
   const fetcher = async (...args) => {
     const res = await fetch(...args)
-    return res.json();
+    if (!res.ok) {
+      const error = new Error('An error occurred while fetching the data.')
+      // Attach extra info to the error object.
+      error.info = await res.json()
+      error.status = res.status
+      throw error
+    }
+
+    return res.json()
   };
 
   const globalConfig = {
     fetcher,
-    localStorageProvider,
-    refreshInterval: 1000,
+    refreshInterval: 10000,
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     shouldRetryOnError: false,
   };
 
-  function localStorageProvider() {
-    // When initializing, we restore the data from `localStorage` into a map.
-    const map = new Map(JSON.parse(localStorage.getItem('app-cache') || '[]'))
 
-    // Before unloading the app, we write back all the data into `localStorage`.
-    window.addEventListener('beforeunload', () => {
-      const appCache = JSON.stringify(Array.from(map.entries()))
-      localStorage.setItem('app-cache', appCache)
-    })
-
-    // We still use the map for write & read for performance.
-    return map
-  }
   return (
     <SWRConfig value={globalConfig}>
       <ChakraProvider>
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </ChakraProvider>
     </SWRConfig>
   )

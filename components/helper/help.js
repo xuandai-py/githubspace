@@ -1,33 +1,8 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import useSWR from 'swr'
-// export const fetchUserByName = (username) => {
-//   const [data, setData] = useState(undefined);
-//   const [error, setError] = useState("");
-//   const [loading, setLoading] = useState(true);
-
-//   const fetchData = async () => {
-//     try {
-//       const response = await axios.get(username);
-//       setData(response.data);
-//     } catch (error) {
-//       setError(error);
-//       setLoading(false);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchData();
-//   }, []);
-
-//   return { data, error, loading, fetchData };
-// };
-
-
+import useSWR, { useSWRConfig } from 'swr'
 
 export const useUser = (url, id) => {
+
   const [requestData, setRequestData] = useState({});
   const { data, error, isLoading } = useSWR(`${url}${id}`)
   useEffect(() => {
@@ -43,15 +18,14 @@ export const useUser = (url, id) => {
       });
 
   }, [data])
-  console.log(`hook now being call`)
   return {
     userSWR: data,
     isLoading,
     isError: error,
-    request: requestData
+    request: requestData,
   }
-
 }
+
 
 const colors = [
   'red',
@@ -86,7 +60,7 @@ export const colours = [
 
 
 export function pickChakraRandomColor(variant = '') {
-  const color = colours[Math.floor(Math.random(2) * colors.length)];
+  const color = colours[Math.floor(Math.random(1) * colors.length)];
   return color;
 }
 

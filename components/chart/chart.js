@@ -1,166 +1,148 @@
+import { Badge, Box, Flex, Heading, SimpleGrid, Text } from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
 import {
-    PieChart, Pie, Sector, Tooltip, ResponsiveContainer,
-    BarChart,
-    Bar,
-    Cell,
-    XAxis,
-    YAxis,
-    CartesianGrid,
-    Legend,
-    LabelList,
-    LineChart,
-    Line
+    Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis,
+    YAxis
 } from 'recharts';
-import { useState, useEffect, } from 'react'
-import { SimpleGrid, Box, Flex, Badge, VStack } from '@chakra-ui/react';
-import { pickChakraRandomColor } from '../helper/help';
-import { genLangData, genStarPerLang, renderCustomizedLabel } from './utils';
-import useSWR from 'swr'
+import { HeadingTitle } from '../base';
+import { genLangData, genStarPerLang } from './utils';
 
-export const Chart = (props) => {
-    const { id } = props
+export const Chart = ({ id, allRepo }) => {
 
-    const { data: allRepo } = useSWR(`https://api.github.com/users/${id}/repos?per_page=100`);
-    // const { data: products } = useSWR(`https://api.github.com/repos/${id}/${repo}`);
-
-    // const [url, setUrl] = useState('')
-    // Create chart with langData
-    const [repoData, setRepoData] = useState([]);
     const [langChartData, setLangChartData] = useState(null);
     const [starChartData, setStarChartData] = useState(null);
     const [starPerLangData, setStarPerLangData] = useState(null);
 
-    const [error, setError] = useState(null)
-    const [activeIndex, setActiveIndex] = useState(0)
-
     useEffect(() => {
-        allRepo
         getRepoData();
-    }, [id])
-
-    useEffect(() => {
-        // fetchData()
+        getStarRepoData()
         getStarPerLang()
-    }, [id, repoData])
+    }, [allRepo])
 
     const getRepoData = () => {
-        // setUrl(url)
-        if (allRepo) {
+        if (allRepo && allRepo.length > 0) {
             setLangChartData(genLangData(allRepo))
-            setRepoData(allRepo)
         } else {
-            console.log('Failed useSWR')
+            console.error('Failed useSWR [chart')
         }
 
     };
-    // const getRepoData = () => {
-    //     fetch(`https://api.github.com/users/${id}/repos?per_page=100`)
-    //         .then(response => {
-    //             if (response.status === 404) {
-    //                 return setError({ active: true, type: 404 });
-    //             }
-    //             if (response.status === 403) {
-    //                 return setError({ active: true, type: 403 });
-    //             }
-    //             return response.json()
-    //         })
-    //         .then(data => {
-    //             setLangChartData(genLangData(data))
-    //             setRepoData(data)
-    //         })
-    //         .catch(error => {
-    //             setError({ active: true, type: 200 })
-    //             console.error('Error:', error)
-    //         })
-    // };
-
-    const fetchData = async () => {
-        const sortProperty = 'stargazers_count';
-        const mostStarredRepos = repoData
-            .filter(repo => !repo.fork)
-            .sort((a, b) => b[sortProperty] - a[sortProperty])
-            .slice(0, 5);
-        const promises = mostStarredRepos.map((repo) =>
-            fetch(`https://api.github.com/repos/${id}/${repo.name}`)
-                .then((response) => {
-                    if (response.status === 404) {
-                        return setError({ active: true, type: 404 });
-                    }
-                    if (response.status === 403) {
-                        return setError({ active: true, type: 403 });
-                    }
-                    console.log('repos')
-                    return response.json();
+    const getStarRepoData = () => {
+        const LIMIT = 5;
+        const sortProperty = 'stargazers_count'
+        if (allRepo && allRepo.length > 0) {
+            const sorted = allRepo
+                .filter(repo => !repo.fork)
+                .sort((a, b) => b[sortProperty] - a[sortProperty])
+                .map((obj) => {
+                    const { stargazers_count, ...rest } = obj
+                    return { ...rest, stars: stargazers_count }
                 })
-                .catch((error) => {
-                    setError({ active: true, type: 200 });
-                    console.error('Error:', error);
-                })
-        );
-
-        const data = await Promise.all(promises);
-        setStarChartData(data)
-        return data;
-    };
-
-    const getStarPerLang = async () => {
-        const mostStarredRepos = repoData.filter(repo => !repo.fork)
-        const promises = mostStarredRepos.map((repo) =>
-            fetch(`https://api.github.com/repos/${id}/${repo.name}`)
-                .then((response) => {
-                    if (response.status === 404) {
-                        return setError({ active: true, type: 404 });
-                    }
-                    if (response.status === 403) {
-                        return setError({ active: true, type: 403 });
-                    }
-                    console.log('repos')
-                    return response.json()
-                })
-                .catch((error) => {
-                    setError({ active: true, type: 200 })
-                    console.error('Error:', error);
-                })
-        );
-
-        const data = await Promise.all(promises);
-        setStarPerLangData(genStarPerLang(data))
-        console.log('Fetch: ', data)
-        return data;
+                .slice(0, LIMIT);
+            setStarChartData(sorted)
+        } else {
+            console.error('Failed to load repoData');
+        }
     }
 
+    //     const mostStarredRepos = repoData
+    //         .filter(repo => !repo.fork)
+    //         .sort((a, b) => b[sortProperty] - a[sortProperty])
+    //         .slice(0, 5)
+    //     const promises = mostStarredRepos.map((repo) =>
+    //         fetch(`https://api.github.com/repos/${id}/${repo.name}`)
+    //             .then((response) => {
+    //                 if (response.status === 404) {
+    //                     return setError({ active: true, type: 404 });
+    //                 }
+    //                 if (response.status === 403) {
+    //                     return setError({ active: true, type: 403 });
+    //                 }
+    //                 console.log('repos [chart]')
+    //                 return response.json()
+    //             })
+    //             .catch((error) => {
+    //                 setError({ active: true, type: 200 });
+    //                 console.error('Error:', error);
+    //             })
+    //     );
 
-    console.log(starPerLangData);
+    //     const data = await Promise.all(promises);
+    //     setStarChartData(data)
+    //     return data;
+    // };
+
+    const getStarPerLang = async () => {
+        if (allRepo && allRepo.length > 0) {
+            const mostStarredRepos = allRepo.filter(repo => !repo.fork)
+            setStarPerLangData(genStarPerLang(mostStarredRepos))
+        } else {
+            console.error('Failed to load repoData');
+        }
+
+    }
 
     return (
-        <SimpleGrid columns={3} spacing={3}>
-
-            <Flex border='1px solid red' height={300} align='center'>
-                <LangChart data={langChartData} />
-                <Flex direction='column' gap={1}>
-                    {langChartData && langChartData.length > 0 && langChartData.map((item, index) => (
-                        <Badge key={index} fontSize='md' bgColor={item.color} align='center'>{item.name}</Badge>
-                    ))}
+        <SimpleGrid columns={{ base: 1, md: 2, xl: 3 }} spacing={3} my={12}>
+            <Box w={'24em'} maxW={'32em'} p={1} m={'0 auto'} bg={'#011627'} borderRadius={'lg'} py={4}>
+                <HeadingTitle title='top languages' />
+                <Flex height={300} align='center' justify={'center'} gap={2} px={2}>
+                    <LangChart data={langChartData} />
+                    <Flex direction='column' gap={1} >
+                        {langChartData && langChartData.length > 0 && langChartData.map((item, index) => (
+                            <Badge key={index} fontSize={{ base: 'sm', md: 'md' }} bgColor={item.color} align='center'>{item.name}</Badge>
+                        ))}
+                    </Flex>
                 </Flex>
-            </Flex>
-            <Box height={300}>
-                <StarChart data={starChartData} />
             </Box>
-            <Flex border='1px solid red' height={300} align='center'>
-
-                <StarPerLangChart2 data={starPerLangData} />
-                <Flex direction='column' gap={1}>
-                    {starPerLangData && starPerLangData.length > 0 && starPerLangData.map((item, index) => (
-                        <Badge key={index} fontSize='md' bgColor={item.color} align='center'>{item.name}</Badge>
-                    ))}
+            <Box w={'24em'} maxW={'32em'} p={1} m={'0 auto'} bg={'#011627'} borderRadius={'lg'} py={4}>
+                <HeadingTitle title='most starred' />
+                <Flex height={300} align='center' mt={1} justify={'center'} >
+                    <StarChart data={starChartData} />
                 </Flex>
-            </Flex>
+            </Box>
+            <Box w={'24em'} maxW={'32em'} p={1} m={'0 auto'} bg={'#011627'} borderRadius={'lg'} py={4}>
+                <HeadingTitle title='stars per language' />
+                <Flex height={300} align='center' justify={'center'} gap={2} px={2}>
+                    <StarPerLangChart data={starPerLangData} />
+                    <Flex direction='column' gap={1}>
+                        {starPerLangData && starPerLangData.length > 0 && starPerLangData.map((item, index) => (
+                            <Badge key={index} fontSize={{ base: 'sm', md: 'md' }} bgColor={item.color} align='center'>{item.name}</Badge>
+                        ))}
+                    </Flex>
+                </Flex>
+            </Box>
 
         </SimpleGrid>
 
 
     );
 }
+
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+        return (
+            <Box className="custom-tooltip" w={'240px'} border={0} p={4} m={0} lineHeight={8} bgColor={'#1a202c'}>
+                <Heading className="label" size={'md'} letterSpacing={2} textTransform={'uppercase'} color={'#1DB954'}>{`${label}`}</Heading>
+                <Text className="intro" fontSize={'md'} letterSpacing={1} color={'#1DB954'}>{`Stars: ${payload[0].payload.stars}`}</Text>
+            </Box>
+        )
+
+    }
+}
+
+const CustomTooltipLangChart = ({ active, payload, label }) => {
+    if (active && payload && payload.length > 0) {
+        return (
+            <Box className="custom-tooltip" w={'240px'} border={0} p={4} m={0} lineHeight={8} bgColor={'#1a202c'}>
+                <Heading className="label" size={'md'} letterSpacing={2} textTransform={'uppercase'} color={'#1DB954'}>{`${payload[0].name}`}</Heading>
+                <Text className="intro" fontSize={'md'} letterSpacing={1} color={'#1DB954'}>{`Repos: ${payload[0].value}`}</Text>
+            </Box>
+        )
+
+    }
+}
+
 
 const LangChart = ({ data }) => {
     return (
@@ -185,10 +167,8 @@ const LangChart = ({ data }) => {
                         <Cell key={`cell-${index}`} fill={COLORSs[index]} />
                     ))} */}
                 </Pie>
-                <Tooltip />
-
+                <Tooltip content={<CustomTooltipLangChart />} />
             </PieChart >
-
         </ResponsiveContainer>
     )
 }
@@ -204,17 +184,17 @@ const StarChart = ({ data }) => {
                 margin={{
                     top: 5,
                     right: 30,
-                    left: 20,
+                    left: 5,
                     bottom: 5,
                 }}
             >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey='name' />
+                <XAxis dataKey='name' angle='-25' height={50} interval={0} dy={10} />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={<CustomTooltip />} />
                 {/* <Legend /> */}
-                <Bar dataKey='stargazers_count' fill="#8884d8" minPointSize={5}>
-                    <LabelList dataKey='name' content={renderCustomizedLabel} />
+                <Bar dataKey='stars' fill="#8884d8" minPointSize={5}>
+                    {/* <LabelList dataKey='name' content={renderCustomizedLabel} /> */}
                 </Bar>
                 {/* <Bar dataKey="uv" fill="#82ca9d" minPointSize={10} /> */}
             </BarChart>
@@ -222,50 +202,7 @@ const StarChart = ({ data }) => {
     )
 }
 
-
 const StarPerLangChart = ({ data }) => {
-    return (
-        <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-                width={500}
-                height={300}
-                data={data}
-                margin={{
-                    top: 5,
-                    right: 30,
-                    left: 20,
-                    bottom: 5,
-                }}
-            >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="language" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" name='s' dataKey="starTotal" stroke="#82ca9d" activeDot={{ r: 8 }} />
-                {/* <Line type="monotone" dataKey="uv" stroke="#82ca9d" /> */}
-            </LineChart>
-        </ResponsiveContainer>
-    )
-}
-
-// const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
-const COLORS = [
-    'red',
-    'orange',
-    'yellow',
-    'green',
-    'teal',
-    'blue',
-    'cyan',
-    'purple',
-    'pink',
-];
-
-
-
-
-const StarPerLangChart2 = ({ data }) => {
     return (
         <ResponsiveContainer width="60%" height="100%" border='1px'>
             <PieChart width={200} height={200}>
@@ -284,7 +221,7 @@ const StarPerLangChart2 = ({ data }) => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip content={<CustomTooltipLangChart />} />
             </PieChart>
         </ResponsiveContainer>
 

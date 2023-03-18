@@ -1,0 +1,3 @@
+company
+location
+blog
