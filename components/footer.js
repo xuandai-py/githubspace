@@ -1,7 +1,7 @@
-import { Box, Icon, Link } from '@chakra-ui/react';
+import React from 'react'
+import { Box, Icon, Link, Text } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import { HiOutlineHeart, HiOutlinePlusSm } from 'react-icons/hi';
-
 const links = [
     {
         name: 'Next.js',
@@ -37,14 +37,14 @@ const links = [
 
 const Footer = () => (
     <Box align={'center'} justify={'center'} mb={5}>
-        <text>Built with</text>
+        <Text>Built with</Text>
         {links.map((link) => (
-            <>
+            <React.Fragment key={link.name}>
                 <Link as={NextLink} href={link.link} target={link.target} rel={link.ref} color={'#1DB954'} mx={1}>
                     @{link.name}
                 </Link>
                 <Icon as={HiOutlinePlusSm} mx={1} boxSize={'10px'}/>
-            </>
+            </React.Fragment>
         ))}
         <Icon as={HiOutlineHeart} ml={1} mb={'-2px'} color={'#1DB954'} boxSize={'18px'} borderBottom={'2px dashed'}/>
     </Box>

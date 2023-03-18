@@ -28,7 +28,7 @@ export default function Home() {
   return (
     <Flex height='90vh' alignItems='center' justifyContent='center'  pb='10' >
       <Flex direction='column' alignItems='center' backgroundColor={formBackground} p={12} rounded={6} gap={6}>
-        <Image src='/github-octocat.svg' width={100} height={100} />
+        <Image src='/github-octocat.svg' width={100} height={100} alt={'github-octocat'}/>
         <Heading size={{base: 'lg', md: 'xl'}} fontSize='2.2rem' align='center'>Find Your Github Space</Heading>
         <Formik
           initialValues={{ name: '' }}

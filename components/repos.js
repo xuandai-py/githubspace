@@ -1,6 +1,7 @@
 import React, { useState, useEffect, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import FlipMove from 'react-flip-move';
+import { Flipper, Flipped } from 'react-flip-toolkit'
 import { VscRepo, VscTerminalPowershell, VscRepoForked, VscStarEmpty } from 'react-icons/vsc'
 import { Heading, Select, Box, Flex, SimpleGrid, Button, Text, HStack, Icon } from '@chakra-ui/react';
 import { HeadingTitle } from './base';
@@ -52,7 +53,7 @@ const Repos = ({ repoData }) => {
                     <SimpleGrid columns={[1, 2, 3, 4]} spacing={4}>
                         {
                             topRepos.map((repo, index) => (
-                                <FlipMove >
+                                <FlipMove key={index}>
                                     <Repo key={repo.id} {...repo} />
                                 </FlipMove>
                             ))
@@ -99,6 +100,7 @@ const Repo = forwardRef((props, ref) => (
     </Flex>
 ))
 
+Repo.displayName = 'Repo'
 Repos.propTypes = {
     repoData: PropTypes.array.isRequired,
 };

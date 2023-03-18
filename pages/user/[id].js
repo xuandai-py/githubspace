@@ -19,7 +19,8 @@ const User = () => {
     const { data: allRepo } = useSWR(`https://api.github.com/users/${id}/repos?per_page=100`);
     const { data: userEvent } = useSWR(`/api/hello?id=${id}`)
 
-    useEffect(() => { data, allRepo, userEvent }, [])
+    // useEffect(() => { data, allRepo, userEvent }, [])
+
     const rateLimit = request.rate
     const options = { year: 'numeric', month: 'short', day: 'numeric' };
     const dateJoined = new Date(data?.created_at).toLocaleDateString('en-US', options);
@@ -86,7 +87,7 @@ const User = () => {
                                     ?
                                     userEvent.achievements.map((item, index) => (
                                         <Flex key={index} border={'1px solid #9ea7b3'} gap={4} align={'center'} py={4} borderRadius={'md'} direction={'column'}>
-                                            <Image boxSize={28} objectFit={'cover'} src={item.cover} />
+                                            <Image boxSize={28} objectFit={'cover'} src={item.cover} alt={item.title}/>
                                             <Flex direction={'row'} gap={2} pt={1} align={'center'} borderTop={'1px'} >
                                                 <Heading size={{ base: 'sm', lg: 'md' }}>{item.title}</Heading>
                                                 {item.number_at_achievement && <Badge variant={'outline'} borderRight={'2px'} borderBottom={'2px'} colorScheme='green'>{item.number_at_achievement}</Badge>}
