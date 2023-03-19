@@ -32,11 +32,11 @@ function MyApp({ Component, pageProps }) {
 
   return (
     <SWRConfig value={globalConfig}>
-      <ChakraProvider>
-        <Layout>
+      <Layout>
+        <ChakraProvider>
           <Component {...pageProps} />
-        </Layout>
-      </ChakraProvider>
+        </ChakraProvider>
+      </Layout>
     </SWRConfig>
   )
 
